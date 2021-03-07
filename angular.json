@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "Deployments"
+    }
+  },
+  "defaultProject": "Deployments",
+  "cli": {
+    "analytics": false
+  }
 }
