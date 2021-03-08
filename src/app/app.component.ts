@@ -7,19 +7,62 @@ import { ApiService } from './api.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+  // variables to read JSON data
   projects = [];
   environments = [];
   releases = [];
   deployments = [];
+
+  title = "Deployments";
+ 
+  // array to save releases that were deployed
+  retainReleases = [];
+  // array to save redundant releases which were not deployed
+  redundentReleases = [];
+  // user input to filter number of releases
+  numberOfReleasesToRetain = 5;
+
   constructor(private apiService: ApiService) {}
-  title = 'Deployments';
 
   ngOnInit() {
+    // load the data to respective array before filtering top n releases.
     Promise.all([this.getProjects(), this.getEnvironments(), this.getReleases(), this.getDeployments()]).then(() => {
       if (this.releases && this.deployments && this.environments && this.projects) {
-        
+        this.getTopnReleasesThatwereDeployed(this.numberOfReleasesToRetain)
       }
     });
+  }
+
+  getTopnReleasesThatwereDeployed(n: number) {
+    let returnNReleases = [];
+    this.retainReleases = [];
+    this.redundentReleases = [];
+    this.releases.forEach(release => {
+      if (this.deployments.findIndex(deployment => deployment.ReleaseId === release.Id) === -1) {
+        // delete the release
+        this.redundentReleases.push(release);
+      } else {
+        if (this.checkforDuplicateReleasesinRetainedList(release.Id)) {
+          // retain releases
+          this.retainReleases.push(release);
+        }
+      }
+    });
+    if (n > this.retainReleases.length - 1) {
+      // out of array exception
+    } else if(n <= 0) {
+      // negative number exception
+    } else if(n > 0 && n < this.retainReleases.length) {
+      returnNReleases = this.retainReleases.slice(0, n);
+    }
+    return returnNReleases;
+  }
+
+  checkforDuplicateReleasesinRetainedList(ReleaseID: string) {
+    if (this.retainReleases.findIndex(release => release.Id === ReleaseID) > -1) {
+      return false;
+    }
+    return true;
   }
   
   getProjects() {
