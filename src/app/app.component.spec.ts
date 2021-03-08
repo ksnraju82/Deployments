@@ -1,13 +1,17 @@
 import { TestBed, async } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import {HttpClientModule} from '@angular/common/http';
 import { AppComponent } from './app.component';
+import { ApiService } from './api.service';
 
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule
+        RouterTestingModule,
+        HttpClientModule
       ],
+      providers: [ApiService],
       declarations: [
         AppComponent
       ],
@@ -22,7 +26,7 @@ describe('AppComponent', () => {
 
   it(`should have as title 'Deployments'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
+    const app = fixture.componentInstance; 
     expect(app.title).toEqual('Deployments');
   });
   
