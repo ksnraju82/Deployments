@@ -5,6 +5,7 @@ import { AppComponent } from './app.component';
 import { ApiService } from './api.service';
 
 describe('AppComponent', () => {
+  let service: ApiService;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -14,8 +15,9 @@ describe('AppComponent', () => {
       providers: [ApiService],
       declarations: [
         AppComponent
-      ],
+      ],      
     }).compileComponents();
+    service = TestBed.inject(ApiService);
   }));
 
   it('should create the app', () => {
@@ -29,5 +31,35 @@ describe('AppComponent', () => {
     const app = fixture.componentInstance; 
     expect(app.title).toEqual('Deployments');
   });
+
+  it('#getActiveReleasesValue should return value from a promise',
+  (done: DoneFn) => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    app.getActiveReleases().then(value => {
+    expect(value).toBeTrue();
+    done();
+  });
+});
+
+it('#getRedundentReleasesValue should return value from a promise',
+  (done: DoneFn) => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    app.getRedundentReleases().then(value => {
+    expect(value).toBeTrue();
+    done();
+  });
+});
+
+it('#getTopnReleasesThatwereDeployed should return value from a promise',
+  (done: DoneFn) => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    app.getActiveReleasesByNumber(3).then(value => {
+    expect(value).toBeTrue();
+    done(); 
+  });
+});
   
 });

@@ -22,8 +22,9 @@ export class AppComponent {
   // array to save redundant releases which were not deployed
   nonDeployedReleases = [];
   // user input to filter number of releases
-  numberOfReleasesToRetain = 5;  
+  noOfReleases = 5;  
 
+  activeReleases = [];
   deletedReleases = [];
 
   constructor(private apiService: ApiService,
@@ -33,34 +34,42 @@ export class AppComponent {
     // load the data to respective array before filtering top n releases.
     Promise.all([this.getProjects(), this.getEnvironments(), this.getReleases(), this.getDeployments()]).then(() => {
       if (this.releases && this.deployments && this.environments && this.projects) {
-        this.getTopnReleasesThatwereDeployed(this.numberOfReleasesToRetain);
+        this.getActiveReleasesByNumber(this.noOfReleases);
       }
     }, error => {
       this.loggger.error(error);
     });
   }
 
-  getTopnReleasesThatwereDeployed(n: number) {   
-    let activeReleases = [];
-    Promise.all([ this.getActiveReleases(), this.getRedundentReleases()]).then(() => {
-      if (n > this.deployedReleases?.length - 1) {
-        // out of range exception
-          this.loggger.error('Out of range error. Please provide a lesser number');
-      } else if(n <= 0) {
-        // negative number exception        
-        this.loggger.error('Please provide a number greated than 0');
-      } else if(n > 0 && n < this.deployedReleases?.length) {
-        activeReleases = this.deployedReleases.slice(0, n);
-        this.loggger.log('Number of Releases to Retain :');
-        this.loggger.log(activeReleases);        
-        this.loggger.log('Number of Releases to Delete :');
-        this.deletedReleases = this.deployedReleases.splice(n, this.deployedReleases.length - n);
-        this.loggger.log(this.deletedReleases);
-      }       
-    }, error => {
-      this.loggger.error(error);
+  getActiveReleasesByNumber(n: number) {   
+    const promise = new Promise((resolve, reject) => {
+      this.activeReleases = [];
+      Promise.all([ this.getActiveReleases(), this.getRedundentReleases()]).then(() => {
+        if (n > this.deployedReleases?.length) {
+          // out of range exception
+            this.loggger.error('Out of range error. Please provide a lesser number');
+            throwError('Out of range error. Please provide a lesser number');
+        } else if(n <= 0) {
+          // negative number exception        
+          this.loggger.error('Please provide a number greated than 0');
+          throwError('Please provide a number greated than 0');
+        } else if(n > 0 && n < this.deployedReleases?.length) {
+          this.activeReleases = this.deployedReleases.slice(0, n);
+          this.loggger.log('Number of Releases to Retain :');
+          this.loggger.log(this.activeReleases);        
+          this.loggger.log('Number of Releases to Delete :');
+          this.deletedReleases = this.deployedReleases.splice(n, this.deployedReleases.length - n);
+          this.loggger.log(this.deletedReleases);
+        }
+        resolve(this.activeReleases.length);
+      }, error => {
+        this.loggger.error(error);
+        reject(error);
+      });
     });
+    return promise;
   }
+ 
 
   getActiveReleases() {
     const promise = new Promise((resolve) => {
