@@ -3,6 +3,7 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 
 import {  throwError } from 'rxjs';
 import {  catchError } from 'rxjs/operators';
+import { LogService } from './log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,19 +15,20 @@ export class ApiService {
   private releaseURL = "http://localhost:3000/releases";
   private deploymentsURL = "http://localhost:3000/deployments";
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient,
+              private logger: LogService) { }
 
   handleError(error: HttpErrorResponse) {
-    let errorMessage = 'Unknown error!';
+    this.logger.error('Unknown error!');
     if (error.error instanceof ErrorEvent) {
-      // Client-side errors
-      errorMessage = `Error: ${error.error.message}`;
+      // Client-side errors      
+      this.logger.error(`Error: ${error.error.message}`);
     } else {
-      // Server-side errors
-      errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+      // Server-side errors      
+      this.logger.error(`Error Code: ${error.status}\nMessage: ${error.message}`);
     }
-    window.alert(errorMessage);
-    return throwError(errorMessage);
+    window.alert(`Error: ${error.error.message}`);
+    return throwError(`Error: ${error.error.message}`);
   }
 
   public getProjects(){
